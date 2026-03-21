@@ -1,0 +1,51 @@
+m, n, x, y = map(int, input().split())
+
+# 马的8个移动方向
+bx = [1, 2, 2, 1, -1, -2, -2, -1]
+by = [2, 1, -1, -2, -2, -1, 1, 2]
+
+blocked = set()
+# 马的攻击范围
+for i in range(8):+
+    dx = x + bx[i]
+    dy = y + by[i]
+    if 0 <= dx <= m and 0 <= dy <= n:
+        blocked.add((dx, dy))
+# 马本身的位置
+blocked.add((x, y))#这里马的位置也应该判断，但没有，固标志一下
+
+# 维度：n+1行（y轴0~n），m+1列（x轴0~m）
+dp = [[0] * (m + 1) for _ in range(n + 1)]
+
+# 初始化起点(0,0) → 行0（y=0），列0（x=0）
+if (0, 0) not in blocked:
+    dp[0][0] = 1
+
+# 初始化第一行（y=0，所有x）→ 行固定0，列遍历x（1~m）
+for linex in range(1, m + 1):
+    # 坐标是(x, 0)，对应行0、列linex
+    if (linex, 0) in blocked:#元组无所谓，因为元组是正常想法填的
+        dp[0][linex] = 0#列表的第一个数值是行
+    else:
+        dp[0][linex] = dp[0][linex - 1]
+
+# 初始化第一列（x=0，所有y）→ 列固定0，行遍历y（1~n）
+for liney in range(1, n + 1):
+    # 坐标是(0, y)，对应行liney、列0
+    if (0, liney) in blocked:
+        dp[liney][0] = 0
+    else:
+        dp[liney][0] = dp[liney - 1][0]
+
+# 动态规划计算所有位置：先遍历y（行），再遍历x（列）
+for liney in range(1, n + 1):
+    for linex in range(1, m + 1):
+        # 坐标是(x, y) = (linex, liney)
+        if (linex, liney) in blocked:
+            dp[liney][linex] = 0
+        else:
+            # 路径数 = 上边(y-1, x) + 左边(y, x-1)
+            dp[liney][linex] = dp[liney - 1][linex] + dp[liney][linex - 1]
+
+# 终点(m, n) → 行n（y=n），列m（x=m）
+print(dp[n][m])
